@@ -54,17 +54,6 @@ exports.createUser = async (req, res) => {
           success: true,
           message: "Account created succesfully",
         });
-
-        // generating the token
-        const token = await jwt.sign(
-          { id: newUser._id, email: email.toLowerCase() },
-          process.env.TOKEN_KEY,
-          { expiresIn: "6h" }
-        );
-
-        // saving the token inside the user details
-        newUser.token = token;
-        await newUser.save();
       }
 
       // if account details not saved
@@ -94,11 +83,22 @@ exports.loginUser = async (req, res) => {
   if (checkUser) {
     // checking the password is matching or not
     const passwordMatched = await bcrypt.compare(password, checkUser.password);
-    if (passwordMatched) {
+    if (passwordMatched) {     
+        // generating the token
+        const token = await jwt.sign(
+          { id: checkUser._id, email: email.toLowerCase() },
+          process.env.TOKEN_KEY,
+          { expiresIn: "6h" }
+        );
+
+        // saving the token inside the user details
+        checkUser.token = token;
+        await checkUser.save();      
+
       return res.status(200).json({
         success: true,
         message: "User login succesfully",
-        token:checkUser.token
+        token: checkUser.token
       })
     }
     else {
