@@ -81,3 +81,61 @@ exports.createUser = async (req, res) => {
     });
   }
 };
+
+// creating the login route for the existing user
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
+  // checking that the fields are empty or not
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "All fields are mandatory",
+    });
+  }
+
+  // checking that the email exist or not
+  let isEmailExist;
+  try {
+    isEmailExist = await user.findOne({ email });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "Failed to login\n Try again",
+    });
+  }
+
+  // if email does not exist
+  if (!isEmailExist) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid Details",
+    });
+  }
+
+  // if user exists then matching the password
+  const isPasswordMatched = await bcrypt.compare(
+    password,
+    isEmailExist.password
+  );
+
+  if (!isPasswordMatched) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid Details",
+    });
+  }
+
+  // if password matched then send back user details and token
+  const token = jwt.sign({id:isEmailExist._id}, process.env.TOKEN_KEY, {
+    expiresIn: "1h",
+  });
+
+  isEmailExist.password = undefined;
+  res.status(200).json({
+    success: true,
+    data: isEmailExist,
+    message: "Logged in successfully",
+    token
+  });
+};
