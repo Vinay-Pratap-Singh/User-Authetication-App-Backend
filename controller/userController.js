@@ -128,7 +128,7 @@ exports.login = async (req, res) => {
 
   // if password matched then send back user details and token
   const token = jwt.sign({id:isEmailExist._id}, process.env.TOKEN_KEY, {
-    expiresIn: "1h",
+    expiresIn: "2hr",
   });
 
   isEmailExist.password = undefined;
