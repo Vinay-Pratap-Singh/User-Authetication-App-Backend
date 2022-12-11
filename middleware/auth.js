@@ -20,17 +20,11 @@ exports.auth = async (req, res, next) => {
       success: false,
       message: "Invalid token",
     });
-  } else {
-    // if verifed successfully
-    res.status(200).json({
-      success: true,
-      message: "Token verifed successfully",
-      id: verifiedToken.id,
-      email: verifiedToken.email,
-    });
-      
+    } 
+    
+    req.id = verifiedToken.id;
       next();
-  }
+
   } catch (error) {
       res.status(400).json({
           success: false,
